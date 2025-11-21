@@ -140,7 +140,10 @@ IFS=$'\n' read -rd '' -a WHEEL_ARRAY <<< "$AVAILABLE_WHEELS"
 
 i=1
 for wheel in "${WHEEL_ARRAY[@]}"; do
-    echo -e "$i) ${YELLOW}$wheel${NC}"
+    # Display a clean name in the UI (removing the hash)
+    display_name="${wheel%%#*}"
+    display_name=$(basename "$display_name")
+    echo -e "$i) ${YELLOW}$display_name${NC}"
     ((i++))
 done
 
@@ -154,13 +157,18 @@ fi
 
 
 RAW_LINK="${WHEEL_ARRAY[$((selection-1))]}"
-SELECTED_FILENAME=$(basename "$RAW_LINK")
 
-# Construct URL: Handle both absolute and relative links
-if [[ "$RAW_LINK" == http* ]]; then
-    DOWNLOAD_URL="$RAW_LINK"
+# --- FIX: Strip the hash fragment ---
+# This removes everything after the '#' character
+CLEAN_LINK="${RAW_LINK%%#*}"
+
+SELECTED_FILENAME=$(basename "$CLEAN_LINK")
+
+# Construct URL: Handle both absolute and relative links using the CLEAN link
+if [[ "$CLEAN_LINK" == http* ]]; then
+    DOWNLOAD_URL="$CLEAN_LINK"
 else
-    DOWNLOAD_URL="${FULL_REPO_URL}/${RAW_LINK}"
+    DOWNLOAD_URL="${FULL_REPO_URL}/${CLEAN_LINK}"
 fi
 
 # =================================================================
