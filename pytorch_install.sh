@@ -152,8 +152,16 @@ if ! [[ "$selection" =~ ^[0-9]+$ ]] || [ "$selection" -lt 1 ] || [ "$selection" 
     exit 1
 fi
 
-SELECTED_FILENAME="${WHEEL_ARRAY[$((selection-1))]}"
-DOWNLOAD_URL="${FULL_REPO_URL}/${SELECTED_FILENAME}"
+
+RAW_LINK="${WHEEL_ARRAY[$((selection-1))]}"
+SELECTED_FILENAME=$(basename "$RAW_LINK")
+
+# Construct URL: Handle both absolute and relative links
+if [[ "$RAW_LINK" == http* ]]; then
+    DOWNLOAD_URL="$RAW_LINK"
+else
+    DOWNLOAD_URL="${FULL_REPO_URL}/${RAW_LINK}"
+fi
 
 # =================================================================
 # PHASE 4: Download & Install (Project Setup)
@@ -162,10 +170,15 @@ DOWNLOAD_URL="${FULL_REPO_URL}/${SELECTED_FILENAME}"
 mkdir -p "$DOWNLOAD_DIR"
 DEST_FILE="$DOWNLOAD_DIR/$SELECTED_FILENAME"
 
-log_step "Downloading..."
-wget -q --show-progress -O "$DEST_FILE" "$DOWNLOAD_URL"
-exit_on_error "Download failed."
-log_success "Downloaded to $DEST_FILE"
+log_step "Downloading to $DEST_FILE..."
+# Check if file exists to avoid re-downloading
+if [ -f "$DEST_FILE" ]; then
+    echo "File already exists. Skipping download."
+else
+    wget -q --show-progress -O "$DEST_FILE" "$DOWNLOAD_URL"
+    exit_on_error "Download failed."
+fi
+log_success "Download Ready."
 
 # --- Project Setup ---
 log_step "Project Setup"
