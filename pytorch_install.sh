@@ -120,8 +120,8 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Filter for: .whl AND python_tag AND linux_aarch64
-AVAILABLE_WHEELS=$(grep -o 'href="[^"]*"' "$TEMP_HTML" | cut -d'"' -f2 | grep ".whl" | grep "$PY_TAG" | grep "linux_aarch64" | sort -V -r)
+# Filter for: .whl AND python_tag AND linux_aarch64 AND torch
+AVAILABLE_WHEELS=$(grep -o 'href="[^"]*"' "$TEMP_HTML" | cut -d'"' -f2 | grep ".whl" | grep "torch" | grep "$PY_TAG" | grep "linux_aarch64" | sort -V -r)
 rm "$TEMP_HTML"
 
 if [ -z "$AVAILABLE_WHEELS" ]; then
